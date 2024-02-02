@@ -1,27 +1,33 @@
-// main.go
 package main
 
 import (
 	"fmt"
-
-	"github.com/scortier/go-parser/lexer"
-
 	"os"
 
 	"github.com/scortier/go-parser/parser"
 )
 
 func main() {
-	input := "{}"
+	filePath := "tests/step2/valid.json" // Change this to test invalid.json
 
-	tokens := lexer.Tokenize(input)
-	_, err := parser.Parse(tokens)
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	jsonParser := parser.NewParser(file)
+	result, err := jsonParser.Parse()
 
 	if err != nil {
-		fmt.Println("Invalid JSON:", err)
+		fmt.Println("Error parsing JSON:", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Valid JSON")
-	os.Exit(0)
+	if result {
+		os.Exit(0)
+	} else {
+		os.Exit(1)
+	}
 }

@@ -1,13 +1,17 @@
-// lexer/lexer.go
 package lexer
+
+import (
+	"bufio"
+	"io"
+)
 
 type TokenType int
 
 const (
-	ObjectStart TokenType = iota
-	ObjectEnd
-	EOF
-	Invalid
+	TokenError TokenType = iota
+	TokenLeftBrace
+	TokenRightBrace
+	TokenEOF
 )
 
 type Token struct {
@@ -15,18 +19,32 @@ type Token struct {
 	Value string
 }
 
-func Tokenize(input string) []Token {
-	tokens := make([]Token, 0)
+type Lexer struct {
+	reader *bufio.Reader
+}
 
-	for _, char := range input {
-		switch char {
-		case '{':
-			tokens = append(tokens, Token{ObjectStart, "{"})
-		case '}':
-			tokens = append(tokens, Token{ObjectEnd, "}"})
+func NewLexer(reader io.Reader) *Lexer {
+	return &Lexer{
+		reader: bufio.NewReader(reader),
+	}
+}
+
+func (l *Lexer) NextToken() Token {
+	char, _, err := l.reader.ReadRune()
+
+	if err != nil {
+		if err == io.EOF {
+			return Token{Type: TokenEOF, Value: ""}
 		}
+		return Token{Type: TokenError, Value: err.Error()}
 	}
 
-	tokens = append(tokens, Token{EOF, ""})
-	return tokens
+	switch char {
+	case '{':
+		return Token{Type: TokenLeftBrace, Value: string(char)}
+	case '}':
+		return Token{Type: TokenRightBrace, Value: string(char)}
+	default:
+		return Token{Type: TokenError, Value: "Invalid token"}
+	}
 }
