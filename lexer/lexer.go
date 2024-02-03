@@ -12,6 +12,11 @@ const (
 	TokenLeftBrace
 	TokenRightBrace
 	TokenEOF
+	TokenString
+	TokenNumber
+	TokenTrue
+	TokenFalse
+	TokenNull
 )
 
 type Token struct {
